@@ -1,0 +1,5 @@
+/config.yaml
+/ipython.sh
+/data/*
+/__pycache__/*
+*~
