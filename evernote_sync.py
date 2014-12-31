@@ -60,9 +60,9 @@ class EvernoteSync(evernote_link.EvernoteLink):
             note['in_sync'] = True
 
     # notify if throttling limit is reached while fetching note
-    def fetchNote(this, guid):
+    def fetchNote(this, guid, silent=False):
         try:
-            return super().fetchNote(guid)
+            return super().fetchNote(guid, silent)
         except Errors.EDAMSystemException as e:
             if e.errorCode == Errors.EDAMErrorCode.RATE_LIMIT_REACHED:
                 print("Rate limit reached")
@@ -70,9 +70,9 @@ class EvernoteSync(evernote_link.EvernoteLink):
                 raise
 
     # notify user if throttling limit is reached while fetching resource
-    def fetchResource(this, guid):
+    def fetchResource(this, guid, silent=False):
         try:
-            return super().fetchResource(guid)
+            return super().fetchResource(guid, silent)
         except Errors.EDAMSystemException as e:
             if e.errorCode == Errors.EDAMErrorCode.RATE_LIMIT_REACHED:
                 print("Rate limit reached")
@@ -121,8 +121,11 @@ class EvernoteSync(evernote_link.EvernoteLink):
         outFile = os.path.join(this.folder, 'notes', guid)
         note = this.metadata['notes'][guid]
         if not hashedFileExists(outFile, note['contentHash']):
-            noteData = this.fetchNote(guid)
-            this._report("Saving note: " + outFile)
+            noteData = this.fetchNote(guid, silent=True)
+            if os.path.isfile(outFile):
+                this._report("Updating note: " + outFile)
+            else:
+                this._report("Saving note: " + outFile)
             with open(outFile, 'w') as handle:
                 handle.writelines(noteData.content)
         return note
@@ -131,8 +134,11 @@ class EvernoteSync(evernote_link.EvernoteLink):
     def _fetchResourceFile(this, res):
         outFile = os.path.join(this.folder, 'files', res['guid'])
         if not hashedFileExists(outFile, res['data']['bodyHash']):
-            resData = this.fetchResource(res['guid'])
-            this._report("Saving resource: " + outFile)
+            resData = this.fetchResource(res['guid'], silent=True)
+            if os.path.isfile(outFile):
+                this._report("Updating file: " + outFile)
+            else:
+                this._report("Saving file: " + outFile)
             with open(outFile, 'wb') as file:
                 file.write(resData)
 

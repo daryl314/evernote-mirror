@@ -14,7 +14,7 @@ if config['development_mode']:
 else:
     token = config['production']['authToken']
 
-# connect to EverNote
+# connect to Evernote
 e = evernote_sync.EvernoteSync(
     token, config['outFolder'], devMode=config['development_mode'])
 e.connect()

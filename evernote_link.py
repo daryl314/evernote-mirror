@@ -58,7 +58,9 @@ class EvernoteLink:
             this.metadata['lastSyncTime'] = syncState.currentTime
 
     # method to fetch a note
-    def fetchNote(this, guid):
+    def fetchNote(this, guid, silent=False):
+        if not silent:
+            this._report("Fetching note: " + guid)
         return this.noteStore.getNote(
               this.token, # authorization token
               guid,       # note guid
@@ -69,8 +71,9 @@ class EvernoteLink:
         )
 
     # method to fetch a resource
-    def fetchResource(this, guid):
-        this._report("Fetching resource: " + guid)
+    def fetchResource(this, guid, silent=False):
+        if not silent:
+            this._report("Fetching resource: " + guid)
         url = "%s/res/%s" % (this.userInfo.webApiUrlPrefix, guid)
         req = requests.post(url, {'auth':this.token})
         return req.content
