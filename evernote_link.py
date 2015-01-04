@@ -54,7 +54,7 @@ class EvernoteLink:
         if syncState.updateCount == this.metadata['lastSyncCount']:
             this._report("No new data")
         else:
-            this._fetchData()
+            this._fetchData(this.metadata['lastSyncCount'])
             this.metadata['lastSyncTime'] = syncState.currentTime
 
     # method to fetch a note
