@@ -109,7 +109,7 @@ class EvernoteLink:
 
         # update metadata for notebooks, tags, and notes
         for n in s.notebooks or []:
-            this.metadata['notebooks'][n.guid] = n.name
+            this.metadata['notebooks'][n.guid] = n
         for t in s.tags or []:
             this.metadata['tags'][t.guid] = t
         for n in s.notes or []:
