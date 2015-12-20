@@ -54,7 +54,8 @@ class EvernoteSync(evernote_link.EvernoteLink):
     # convert metadata to a dict representation
     def syncMetadata(this):
         evernote_link.EvernoteLink.syncMetadata(this)
-        this.metadata = to_dict(this.metadata)
+        if len(this.metadata['notes']) > 0 and type(this.metadata['notes'].values()[0]) is not dict:
+            this.metadata = to_dict(this.metadata)
 
     # synchronize note data - only fetch dirty notes (in_sync == False)
     def syncNotes(this):
