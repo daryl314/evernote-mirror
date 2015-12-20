@@ -19,16 +19,23 @@ def hashedFileExists(file, h):
 def to_dict(x):
     if type(x) is dict:
         for k,v in x.items():
-            x[k] = to_dict(v)
+            if k.endswith('Hash'):
+                x[k] = binascii.hexlify(v).decode('ascii')
+            else:
+                x[k] = to_dict(v)
     elif type(x) is list:
         x = [ to_dict(a) for a in x ]
     elif type(x) is set:
         x = to_dict(list(x))
-    elif type(x) is bytes:
-        x = binascii.hexlify(x).decode('ascii')
     elif hasattr(x, '__dict__'):
         x = to_dict( x.__dict__ )
     return x
+
+# create a folder if it doesn't exist
+def _createFolder(folderName):
+    if not os.path.isdir(folderName):
+        os.makedirs(folderName)
+
 
 ###############################################################################
 # Class to maintain a local archive of Evernote data
@@ -38,7 +45,7 @@ class EvernoteSync(evernote_link.EvernoteLink):
 
     # initialization
     def __init__(this, token, folder, **kwargs):
-        super().__init__(token, **kwargs)
+        evernote_link.EvernoteLink.__init__(this, token, **kwargs)
         this.folder = folder
         this.metaFile = os.path.join(folder, 'metadata.js')
         this._makeFolders()
@@ -46,7 +53,7 @@ class EvernoteSync(evernote_link.EvernoteLink):
 
     # convert metadata to a dict representation
     def syncMetadata(this):
-        super().syncMetadata()
+        evernote_link.EvernoteLink.syncMetadata(this)
         this.metadata = to_dict(this.metadata)
 
     # synchronize note data - only fetch dirty notes (in_sync == False)
@@ -62,7 +69,7 @@ class EvernoteSync(evernote_link.EvernoteLink):
     # notify if throttling limit is reached while fetching note
     def fetchNote(this, guid, silent=False):
         try:
-            return super().fetchNote(guid, silent)
+            return evernote_link.EvernoteLink.fetchNote(this, guid, silent)
         except Errors.EDAMSystemException as e:
             if e.errorCode == Errors.EDAMErrorCode.RATE_LIMIT_REACHED:
                 print("Rate limit reached")
@@ -72,7 +79,7 @@ class EvernoteSync(evernote_link.EvernoteLink):
     # notify user if throttling limit is reached while fetching resource
     def fetchResource(this, guid, silent=False):
         try:
-            return super().fetchResource(guid, silent)
+            return evernote_link.EvernoteLink.fetchResource(this, guid, silent)
         except Errors.EDAMSystemException as e:
             if e.errorCode == Errors.EDAMErrorCode.RATE_LIMIT_REACHED:
                 print("Rate limit reached")
@@ -96,9 +103,9 @@ class EvernoteSync(evernote_link.EvernoteLink):
 
     # create output directory structure (if it doesn't already exist)
     def _makeFolders(this):
-        os.makedirs(this.folder, exist_ok=True)
-        os.makedirs(os.path.join(this.folder,'notes'), exist_ok=True)
-        os.makedirs(os.path.join(this.folder,'files'), exist_ok=True)
+        _createFolder(this.folder)
+        _createFolder(os.path.join(this.folder,'notes'))
+        _createFolder(os.path.join(this.folder,'files'))
 
     # load metadata file if it exists.  use try block so that corrupted
     # metadata files are re-generated gracefully

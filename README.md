@@ -3,14 +3,14 @@
 Installing Evernote API:
 ```
 cd evernote
-sudo python setup.py install
+sudo python2 setup.py install
 ```
 
 Upgrading Evernote API:
 ```
 git submodule update
 cd evernote
-sudo python setup.py install
+sudo python2 setup.py install
 ```
 
 Creating a new configuration file (config.yaml):

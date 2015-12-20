@@ -1,5 +1,8 @@
 /config.yaml
 /ipython.sh
-/data/*
+data
 /__pycache__/*
 *~
+*.pyc
+*.wpr
+*.wpu
